@@ -1,0 +1,7 @@
+[app_servers]
+app ansible_host=204.236.205.119 private_ip=10.0.1.110
+
+[app_servers:vars]
+ansible_user=ec2-user
+ansible_ssh_private_key_file=~/.ssh/id_rsa
+ansible_python_interpreter=/usr/bin/python3

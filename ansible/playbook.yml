@@ -1,0 +1,151 @@
+---
+- name: Configure EC2 instance for Spring Boot application with MySQL
+  hosts: app_servers
+  become: yes
+  gather_facts: no  # Important: Skip gather_facts initially
+
+  pre_tasks:
+    - name: Install Python 3.8 dependencies
+      raw: yum install -y gcc openssl-devel bzip2-devel libffi-devel zlib-devel wget make
+      ignore_errors: yes
+
+    - name: Download Python 3.8
+      raw: wget https://www.python.org/ftp/python/3.8.12/Python-3.8.12.tgz -O /tmp/Python-3.8.12.tgz
+      ignore_errors: yes
+
+    - name: Extract Python
+      raw: tar -xzf /tmp/Python-3.8.12.tgz -C /tmp/
+      ignore_errors: yes
+
+    - name: Configure and install Python 3.8
+      raw: cd /tmp/Python-3.8.12 && ./configure --enable-optimizations && make altinstall
+      ignore_errors: yes
+
+    - name: Create symlink
+      raw: ln -sf /usr/local/bin/python3.8 /usr/bin/python3.8
+      ignore_errors: yes
+
+    - name: Gather facts with Python 3.8
+      setup:
+        gather_subset: all
+      vars:
+        ansible_python_interpreter: /usr/local/bin/python3.8
+  vars:
+    app_docker_image: rifathmfm/springboot-app:latest
+    ansible_python_interpreter: /usr/bin/python3.8
+    # If using ECR, use:
+    # app_docker_image: YOUR_AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/springboot-app:latest
+    mysql_docker_image: mysql:8.0
+    mysql_root_password: ${MYSQL_PASSWORD}  # Change this in production
+    mysql_database: ${MYSQL_DATABASE}
+    mysql_user: ${MYSQL_USER}
+    mysql_password: ${MYSQL_PASSWORD}     # Change this in production
+    mysql_data_dir: /data/mysql
+
+  tasks:
+    - name: Update all packages
+      ansible.builtin.command: yum update -y
+      become: yes
+
+    - name: Update all packages
+      ansible.builtin.shell: yum update -y
+      become: yes
+
+    - name: Install required packages
+      ansible.builtin.shell: yum install -y docker git python3-pip device-mapper-persistent-data lvm2
+      become: yes
+
+    - name: Install Docker SDK for Python
+      ansible.builtin.shell: pip3 install docker docker-compose
+      become: yes
+
+    - name: Start and enable Docker service
+      ansible.builtin.shell: systemctl start docker && systemctl enable docker
+      become: yes
+
+    - name: Install Docker Compose
+      get_url:
+        url: https://github.com/docker/compose/releases/latest/download/docker-compose-Linux-x86_64
+        dest: /usr/local/bin/docker-compose
+        mode: '0755'
+
+    - name: Install Docker SDK for Python
+      pip:
+        name:
+          - docker
+          - docker-compose
+        state: latest
+
+    - name: Start and enable Docker service
+      systemd:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Add ec2-user to docker group
+      user:
+        name: ec2-user
+        groups: docker
+        append: yes
+
+    - name: Format the EBS volume if it doesn't have a filesystem
+      filesystem:
+        fstype: ext4
+        dev: /dev/xvdf
+      ignore_errors: yes
+
+    - name: Create MySQL data directory
+      file:
+        path: "{{ mysql_data_dir }}"
+        state: directory
+        mode: '0755'
+
+    - name: Mount the EBS volume
+      mount:
+        path: "{{ mysql_data_dir }}"
+        src: /dev/xvdf
+        fstype: ext4
+        state: mounted
+
+    - name: Create app directory
+      file:
+        path: /opt/spring-boot-app
+        state: directory
+        mode: '0755'
+
+    - name: Create Docker Compose file
+      template:
+        src: templates/docker-compose.yml.j2
+        dest: /opt/spring-boot-app/docker-compose.yml
+        mode: '0644'
+    # Install dependencies
+    - name: Install Python dependencies for Docker
+      ansible.builtin.shell: pip3 install "urllib3<2.0" "requests<2.29.0" docker docker-compose
+      become: yes
+
+    # Pull Docker images
+    - name: Pull Docker images
+      ansible.builtin.shell: "docker pull {{ item }}"
+      loop:
+        - "{{ app_docker_image }}"
+        - "{{ mysql_docker_image }}"
+      become: yes
+
+    # Start Docker Compose
+    - name: Start Docker Compose
+      ansible.builtin.shell: cd /opt/spring-boot-app && docker-compose up -d
+      become: yes
+
+    - name: Create systemd service for Docker Compose
+      template:
+        src: templates/spring-mysql.service.j2
+        dest: /etc/systemd/system/spring-mysql.service
+      notify: restart spring-mysql service
+
+  handlers:
+    - name: restart spring-mysql service
+      systemd:
+        name: spring-mysql
+        state: restarted
+        daemon_reload: yes
+        enabled: yes

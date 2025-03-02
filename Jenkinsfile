@@ -33,14 +33,9 @@ pipeline {
     options {
         timeout(time: 1, unit: 'HOURS')
         disableConcurrentBuilds()
-        // Removed ansiColor as it requires a plugin
     }
 
-    // Updated tools section with your actual configured tool names
-    tools {
-        maven 'Maven'  // Use the name configured in Jenkins
-        jdk 'JDK'      // Use the name configured in Jenkins
-    }
+    // Removing the tools section entirely since the tools aren't configured
 
     stages {
         stage('Checkout') {

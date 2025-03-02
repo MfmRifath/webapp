@@ -1,3 +1,4 @@
+// Use a Declarative Pipeline with explicit node
 pipeline {
     agent any
 
@@ -35,11 +36,10 @@ pipeline {
         disableConcurrentBuilds()
     }
 
-    // Removing the tools section entirely since the tools aren't configured
-
     stages {
         stage('Checkout') {
             steps {
+                // Run inside a node block to ensure we have a workspace
                 checkout scm
 
                 // Display info about the build

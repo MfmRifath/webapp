@@ -37,7 +37,6 @@ pipeline {
     }
 
     // Updated tools section with your actual configured tool names
-    // You'll need to replace these with the exact names configured in your Jenkins instance
     tools {
         maven 'Maven'  // Use the name configured in Jenkins
         jdk 'JDK'      // Use the name configured in Jenkins
@@ -260,3 +259,4 @@ pipeline {
             """
         }
     }
+}

@@ -33,12 +33,14 @@ pipeline {
     options {
         timeout(time: 1, unit: 'HOURS')
         disableConcurrentBuilds()
-        ansiColor('xterm')
+        // Removed ansiColor as it requires a plugin
     }
 
+    // Updated tools section with your actual configured tool names
+    // You'll need to replace these with the exact names configured in your Jenkins instance
     tools {
-        maven 'Maven 3'
-        jdk 'JDK 11'
+        maven 'Maven'  // Use the name configured in Jenkins
+        jdk 'JDK'      // Use the name configured in Jenkins
     }
 
     stages {
@@ -258,4 +260,3 @@ pipeline {
             """
         }
     }
-}

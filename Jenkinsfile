@@ -56,7 +56,6 @@ pipeline {
                     def skipTestsOption = params.SKIP_TESTS ? '-DskipTests' : ''
                     sh """
                         echo "Running Maven build with SKIP_TESTS=${params.SKIP_TESTS}"
-                        chmod +x ./mvn
                         mvn clean package ${skipTestsOption}
                     """
                 }

@@ -74,26 +74,16 @@ pipeline {
                 }
             }
         }
-        stage('Install Docker if Missing') {
+        stage('Check Docker Installation') {
             steps {
                 script {
                     def dockerInstalled = sh(script: 'which docker || echo "not_found"', returnStdout: true).trim()
+
                     if (dockerInstalled == "not_found") {
-                        echo "Docker not found. Attempting to install using Homebrew (macOS)..."
-
-                        sh '''
-                            # Install Homebrew if not installed
-                            which brew || /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-
-                            # Install Docker
-                            brew install --cask docker
-
-                            # Start Docker (GUI app, requires manual launch on macOS usually)
-                            open /Applications/Docker.app || echo "Please start Docker Desktop manually if this fails."
-                        '''
+                        error "Docker is not installed or not in PATH. Please install Docker on the Jenkins machine."
                     } else {
-                        echo "Docker is already installed."
                         sh 'docker --version'
+                        echo "Docker is properly installed"
                     }
                 }
             }

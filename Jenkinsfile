@@ -79,26 +79,18 @@ pipeline {
                 script {
                     def dockerInstalled = sh(script: 'which docker || echo "not_found"', returnStdout: true).trim()
                     if (dockerInstalled == "not_found") {
-                        echo "Docker is not installed. Installing Docker..."
+                        echo "Docker not found. Attempting to install using Homebrew (macOS)..."
 
-                        // Detect OS and install Docker (Assuming Debian/Ubuntu-based Jenkins agent)
                         sh '''
-                            apt-get update -y
-                            apt-get install -y apt-transport-https ca-certificates curl gnupg lsb-release
+                            # Install Homebrew if not installed
+                            which brew || /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
-                            curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+                            # Install Docker
+                            brew install --cask docker
 
-                            echo \
-                              "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \
-                              $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
-
-                            apt-get update -y
-                            apt-get install -y docker-ce docker-ce-cli containerd.io
-
-                            systemctl enable docker
-                            systemctl start docker
+                            # Start Docker (GUI app, requires manual launch on macOS usually)
+                            open /Applications/Docker.app || echo "Please start Docker Desktop manually if this fails."
                         '''
-                        echo "Docker installed successfully!"
                     } else {
                         echo "Docker is already installed."
                         sh 'docker --version'

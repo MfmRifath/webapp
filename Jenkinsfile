@@ -129,10 +129,16 @@ pipeline {
                         passwordVariable: 'DOCKER_PASS'
                     )]) {
                         sh """
-                            echo "Logging in to Docker Hub..."
-                            echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+                            echo "🔧 Exporting Docker path"
+                            export PATH=\$PATH:/usr/local/bin:/opt/homebrew/bin
 
-                            echo "Pushing image to Docker Hub..."
+                            echo "📍 Checking Docker binary"
+                            which docker || { echo "❌ Docker not found in PATH"; exit 1; }
+
+                            echo "🔐 Logging in to Docker Hub..."
+                            echo "\$DOCKER_PASS" | docker login -u "\$DOCKER_USER" --password-stdin
+
+                            echo "🚀 Pushing image to Docker Hub..."
                             docker push ${DOCKER_HUB_REPO}:${APP_VERSION}
                             docker push ${DOCKER_HUB_REPO}:latest
                         """

@@ -54,8 +54,8 @@ pipeline {
             steps {
                 sh """
                     echo "Running Maven build with SKIP_TESTS=${params.SKIP_TESTS}"
-                    chmod +x mvnw
-                    mvn clean package ${params.SKIP_TESTS ? '-DskipTests' : ''}
+                    chmod +x ./mvnw
+                    ./mvnw clean package ${params.SKIP_TESTS ? '-DskipTests' : ''}
                 """
             }
             post {
@@ -73,7 +73,6 @@ pipeline {
                 }
             }
         }
-
         stage('Check Docker Installation') {
             steps {
                 script {

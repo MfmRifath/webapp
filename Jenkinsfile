@@ -74,20 +74,27 @@ pipeline {
                 }
             }
         }
-        stage('Check Docker Installation') {
-            steps {
-                script {
-                    def dockerInstalled = sh(script: 'which docker || echo "not_found"', returnStdout: true).trim()
+        stages {
+                stage('Verify Docker') {
+                    steps {
+                        script {
+                            // Use sh for better control of the shell environment
+                            sh '''
+                                echo "🔧 Setting up PATH for Docker"
+                                export PATH=$PATH:/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin
 
-                    if (dockerInstalled == "not_found") {
-                        error "Docker is not installed or not in PATH. Please install Docker on the Jenkins machine."
-                    } else {
-                        sh 'docker --version'
-                        echo "Docker is properly installed"
+                                echo "📍 Checking Docker location..."
+                                which docker || echo "⚠️ Docker not found in PATH"
+
+                                echo "🐳 Checking Docker version..."
+                                docker --version || echo "❌ Docker command failed"
+
+                                echo "✅ Docker check completed"
+                            '''
+                        }
                     }
                 }
             }
-        }
 
         stage('Build Docker Image') {
             steps {

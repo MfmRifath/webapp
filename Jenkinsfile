@@ -16,7 +16,7 @@ pipeline {
         // AWS Configuration
         AWS_REGION = 'us-east-1'
         AWS_CREDS = credentials('aws-credential')
-        SHELL = '/bin/bash'
+
         // Docker image configuration
         APP_VERSION = "${env.BUILD_NUMBER}"
         DOCKER_REGISTRY_CREDS = credentials('docker-registry-credentials')
@@ -54,8 +54,8 @@ pipeline {
             steps {
                 sh """
                     echo "Running Maven build with SKIP_TESTS=${params.SKIP_TESTS}"
-                    chmod +x ./mvnw
-                    ./mvnw clean package ${params.SKIP_TESTS ? '-DskipTests' : ''}
+                    chmod +x mvnw
+                    mvnw clean package ${params.SKIP_TESTS ? '-DskipTests' : ''}
                 """
             }
             post {

@@ -111,15 +111,11 @@ pipeline {
             steps {
                 script {
                     withCredentials([usernamePassword(credentialsId: 'docker-registry-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                        // Login to Docker Hub
-                        sh 'echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin'
-
-                        // Push Docker images
-                        sh """
-                            docker push ${DOCKER_HUB_REPO}:${APP_VERSION}
-                            docker push ${DOCKER_HUB_REPO}:latest
-                        """
+                        sh "echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin"
+                        sh "docker push ${DOCKER_HUB_REPO}:${APP_VERSION}"
+                        sh "docker push ${DOCKER_HUB_REPO}:latest"
                     }
+
                 }
             }
         }

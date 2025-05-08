@@ -1,6 +1,8 @@
 pipeline {
     agent any
-
+    tools {
+            maven 'Maven 3.8.6' // Use the exact name you gave in Jenkins
+        }
     // Define parameters for flexible deployments
     parameters {
         choice(name: 'ENVIRONMENT', choices: ['dev', 'staging', 'prod'], description: 'Deployment environment')
@@ -53,7 +55,7 @@ pipeline {
                     chmod +x mvnw
 
                     # Run Maven build with or without tests
-                    ./mvnw clean package ${params.SKIP_TESTS ? '-DskipTests' : ''}
+                    mvn clean package ${params.SKIP_TESTS ? '-DskipTests' : ''}
                 """
             }
             post {

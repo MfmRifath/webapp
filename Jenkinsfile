@@ -22,13 +22,13 @@ pipeline {
         DOCKER_REGISTRY_CREDS = credentials('docker-registry-credentials')
 
         // Using Docker Hub
-        DOCKER_HUB_REPO = 'rifathmfm/springboot-app'
+        DOCKER_HUB_REPO = 'rifathmfm/s2o-backend'
 
         // MySQL credentials - securely stored in Jenkins
-        MYSQL_ROOT_PASSWORD = credentials('mysql-root-password')
-        MYSQL_USER = credentials('mysql-user')
-        MYSQL_PASSWORD = credentials('mysql-password')
-        MYSQL_DATABASE = 'springbootdb'
+        MYSQL_ROOT_PASSWORD = rootpassword
+        MYSQL_USER = s2o_user
+        MYSQL_PASSWORD = s2o_password
+        MYSQL_DATABASE = 's2o_database'
 
         // EC2 SSH credentials
         SSH_KEY_CREDENTIALS = credentials('aws-ssh-key')

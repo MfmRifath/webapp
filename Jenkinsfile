@@ -25,9 +25,9 @@ pipeline {
         DOCKER_HUB_REPO = 'rifathmfm/s2o-backend'
 
         // MySQL credentials - securely stored in Jenkins
-        MYSQL_ROOT_PASSWORD = rootpassword
-        MYSQL_USER = s2o_user
-        MYSQL_PASSWORD = s2o_password
+        MYSQL_ROOT_PASSWORD = 'rootpassword'
+        MYSQL_USER = 's2o_user'
+        MYSQL_PASSWORD = 's2o_password'
         MYSQL_DATABASE = 's2o_database'
 
         // EC2 SSH credentials

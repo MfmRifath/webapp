@@ -1,5 +1,7 @@
 pipeline {
-    agent any
+    agent {
+        label 'docker-enabled' // Replace with the label of an agent that has Docker installed
+    }
     tools {
             maven 'Maven 3.8.6' // Use the exact name you gave in Jenkins
         }

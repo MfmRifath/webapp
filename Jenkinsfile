@@ -18,7 +18,7 @@ pipeline {
         DOCKER_REGISTRY_CREDS = credentials('docker-registry-credentials')
 
         // Using Docker Hub
-        DOCKER_HUB_REPO = 'yourusername/springboot-app'
+        DOCKER_HUB_REPO = 'rifathmfm/springboot-app'
 
         // MySQL credentials - securely stored in Jenkins
         MYSQL_ROOT_PASSWORD = credentials('mysql-root-password')

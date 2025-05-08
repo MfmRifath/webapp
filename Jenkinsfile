@@ -89,6 +89,24 @@ pipeline {
             }
         }
 
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    withCredentials([usernamePassword(
+                        credentialsId: 'docker-registry-credentials',
+                        usernameVariable: 'DOCKER_USER',
+                        passwordVariable: 'DOCKER_PASS'
+                    )]) {
+                        // Docker login using runtime environment variables
+                        sh '''
+                            echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                            docker build -t ${DOCKER_HUB_REPO}:${APP_VERSION} -t ${DOCKER_HUB_REPO}:latest .
+                        '''
+                    }
+                }
+            }
+        }
+
         stage('Push Docker Image') {
             steps {
                 script {
@@ -102,18 +120,6 @@ pipeline {
                             docker push ${DOCKER_HUB_REPO}:latest
                         """
                     }
-                }
-            }
-        }
-
-        stage('Push Docker Image') {
-            steps {
-                script {
-                    // Push Docker images
-                    sh """
-                        docker push ${DOCKER_HUB_REPO}:${APP_VERSION}
-                        docker push ${DOCKER_HUB_REPO}:latest
-                    """
                 }
             }
         }

@@ -74,8 +74,7 @@ pipeline {
                 }
             }
         }
-        stages {
-                stage('Verify Docker') {
+        stage('Verify Docker') {
                     steps {
                         script {
                             // Use sh for better control of the shell environment
@@ -94,7 +93,6 @@ pipeline {
                         }
                     }
                 }
-            }
 
         stage('Build Docker Image') {
             steps {

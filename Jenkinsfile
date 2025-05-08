@@ -102,9 +102,16 @@ pipeline {
                         usernameVariable: 'DOCKER_USER',
                         passwordVariable: 'DOCKER_PASS'
                     )]) {
-                        // Docker login using runtime environment variables
                         sh '''
+                            echo "🔧 Exporting Docker path"
+                            export PATH=$PATH:/usr/local/bin:/opt/homebrew/bin
+
+                            echo "📍 Checking Docker binary"
+                            which docker || { echo "❌ Docker not found in PATH"; exit 1; }
+
                             echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+
+                            echo "🐳 Building Docker image: $DOCKER_HUB_REPO:$APP_VERSION"
                             docker build -t ${DOCKER_HUB_REPO}:${APP_VERSION} -t ${DOCKER_HUB_REPO}:latest .
                         '''
                     }

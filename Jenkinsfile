@@ -107,19 +107,27 @@ pipeline {
             }
         }
 
+
         stage('Push Docker Image') {
             steps {
                 script {
-                    withCredentials([usernamePassword(credentialsId: 'docker-registry-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                        sh "echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin"
-                        sh "docker push ${DOCKER_HUB_REPO}:${APP_VERSION}"
-                        sh "docker push ${DOCKER_HUB_REPO}:latest"
-                    }
+                    withCredentials([usernamePassword(
+                        credentialsId: 'docker-registry-credentials',
+                        usernameVariable: 'DOCKER_USER',
+                        passwordVariable: 'DOCKER_PASS'
+                    )]) {
+                        sh """
+                            echo "Logging in to Docker Hub..."
+                            echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
 
+                            echo "Pushing image to Docker Hub..."
+                            docker push ${DOCKER_HUB_REPO}:${APP_VERSION}
+                            docker push ${DOCKER_HUB_REPO}:latest
+                        """
+                    }
                 }
             }
         }
-
         stage('Terraform Init') {
             steps {
                 // Configure AWS credentials for Terraform

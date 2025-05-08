@@ -75,15 +75,17 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    // Login to Docker Hub
-                    sh """
-                        echo ${DOCKER_REGISTRY_CREDS_PSW} | docker login -u ${DOCKER_REGISTRY_CREDS_USR} --password-stdin
-                    """
-
-                    // Build Docker image
-                    sh """
-                        docker build -t ${DOCKER_HUB_REPO}:${APP_VERSION} -t ${DOCKER_HUB_REPO}:latest .
-                    """
+                    withCredentials([usernamePassword(
+                        credentialsId: 'docker-registry-credentials',
+                        usernameVariable: 'DOCKER_USER',
+                        passwordVariable: 'DOCKER_PASS'
+                    )]) {
+                        // Docker login using runtime environment variables
+                        sh '''
+                            echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                            docker build -t ${DOCKER_HUB_REPO}:${APP_VERSION} -t ${DOCKER_HUB_REPO}:latest .
+                        '''
+                    }
                 }
             }
         }

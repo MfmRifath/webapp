@@ -71,7 +71,11 @@ pipeline {
                 }
             }
         }
-
+     stage('Verify Docker Installed') {
+                steps {
+                    sh 'docker --version || echo "Docker is not installed!"'
+                }
+            }
         stage('Build Docker Image') {
             steps {
                 script {
@@ -89,11 +93,7 @@ pipeline {
                 }
             }
         }
-        stage('Verify Docker Installed') {
-            steps {
-                sh 'docker --version || echo "Docker is not installed!"'
-            }
-        }
+
         stage('Push Docker Image') {
             steps {
                 script {

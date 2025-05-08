@@ -1,5 +1,10 @@
 pipeline {
-    agent any
+    agent {
+            docker {
+                image 'docker:latest'
+                args '-v /var/run/docker.sock:/var/run/docker.sock'
+            }
+        }
     tools {
             maven 'Maven 3.8.6' // Use the exact name you gave in Jenkins
         }
@@ -86,8 +91,8 @@ pipeline {
                     )]) {
                         // Docker login using runtime environment variables
                         sh '''
-                            echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-                            docker build -t ${DOCKER_HUB_REPO}:${APP_VERSION} -t ${DOCKER_HUB_REPO}:latest .
+                            echo "$DOCKER_PASS" | /path/to/docker login -u "$DOCKER_USER" --password-stdin
+                            /path/to/docker build -t ${DOCKER_HUB_REPO}:${APP_VERSION} -t ${DOCKER_HUB_REPO}:latest .
                         '''
                     }
                 }

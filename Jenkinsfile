@@ -1,13 +1,10 @@
 pipeline {
-    agent {
-            docker {
-                image 'docker:latest'
-                args '-v /var/run/docker.sock:/var/run/docker.sock'
-            }
-        }
+    agent any  // Use any available agent initially
+
     tools {
-            maven 'Maven 3.8.6' // Use the exact name you gave in Jenkins
-        }
+        maven 'Maven 3.8.6' // Use the exact name you gave in Jenkins
+    }
+
     // Define parameters for flexible deployments
     parameters {
         choice(name: 'ENVIRONMENT', choices: ['dev', 'staging', 'prod'], description: 'Deployment environment')
@@ -76,11 +73,22 @@ pipeline {
                 }
             }
         }
-     stage('Verify Docker Installed') {
-                steps {
-                    sh 'docker --version || echo "Docker is not installed!"'
+
+        stage('Check Docker Installation') {
+            steps {
+                script {
+                    def dockerInstalled = sh(script: 'which docker || echo "not_found"', returnStdout: true).trim()
+
+                    if (dockerInstalled == "not_found") {
+                        error "Docker is not installed or not in PATH. Please install Docker on the Jenkins machine."
+                    } else {
+                        sh 'docker --version'
+                        echo "Docker is properly installed"
+                    }
                 }
             }
+        }
+
         stage('Build Docker Image') {
             steps {
                 script {
@@ -91,8 +99,8 @@ pipeline {
                     )]) {
                         // Docker login using runtime environment variables
                         sh '''
-                            echo "$DOCKER_PASS" | /path/to/docker login -u "$DOCKER_USER" --password-stdin
-                            /path/to/docker build -t ${DOCKER_HUB_REPO}:${APP_VERSION} -t ${DOCKER_HUB_REPO}:latest .
+                            echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                            docker build -t ${DOCKER_HUB_REPO}:${APP_VERSION} -t ${DOCKER_HUB_REPO}:latest .
                         '''
                     }
                 }

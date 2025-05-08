@@ -15,5 +15,17 @@ services:
     volumes:
       - db_data:/var/lib/mysql
 
-volumes:
-  db_data:
+  s2o_app:
+    image: rifathmfm/s2o-backend:latest # Replace with your actual image
+    container_name: s2o_springboot_app
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysql
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/s2o_database
+      SPRING_DATASOURCE_USERNAME: s2o_user
+      SPRING_DATASOURCE_PASSWORD: s2o_password
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_SHOW_SQL: "true"

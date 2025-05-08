@@ -52,18 +52,20 @@ pipeline {
 
         stage('Build and Test') {
             steps {
-                sh """
-                    echo "Running Maven build with SKIP_TESTS=${params.SKIP_TESTS}"
-                    chmod +x mvnw
-                    mvnw clean package ${params.SKIP_TESTS ? '-DskipTests' : ''}
-                """
+                script {
+                    def skipTestsOption = params.SKIP_TESTS ? '-DskipTests' : ''
+                    sh """
+                        echo "Running Maven build with SKIP_TESTS=${params.SKIP_TESTS}"
+                        chmod +x ./mvnw
+                        ./mvnw clean package ${skipTestsOption}
+                    """
+                }
             }
             post {
                 success {
                     archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
 
                     script {
-                        // Only archive test results if tests were not skipped
                         if (!params.SKIP_TESTS && fileExists('target/surefire-reports')) {
                             junit 'target/surefire-reports/**/*.xml'
                         } else {

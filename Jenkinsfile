@@ -74,16 +74,34 @@ pipeline {
                 }
             }
         }
-        stage('Check Docker Installation') {
+        stage('Install Docker if Missing') {
             steps {
                 script {
                     def dockerInstalled = sh(script: 'which docker || echo "not_found"', returnStdout: true).trim()
-
                     if (dockerInstalled == "not_found") {
-                        error "Docker is not installed or not in PATH. Please install Docker on the Jenkins machine."
+                        echo "Docker is not installed. Installing Docker..."
+
+                        // Detect OS and install Docker (Assuming Debian/Ubuntu-based Jenkins agent)
+                        sh '''
+                            apt-get update -y
+                            apt-get install -y apt-transport-https ca-certificates curl gnupg lsb-release
+
+                            curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+
+                            echo \
+                              "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \
+                              $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+                            apt-get update -y
+                            apt-get install -y docker-ce docker-ce-cli containerd.io
+
+                            systemctl enable docker
+                            systemctl start docker
+                        '''
+                        echo "Docker installed successfully!"
                     } else {
+                        echo "Docker is already installed."
                         sh 'docker --version'
-                        echo "Docker is properly installed"
                     }
                 }
             }

@@ -11,7 +11,7 @@ pipeline {
     environment {
         // AWS Configuration
         AWS_REGION = 'us-east-1'
-        AWS_CREDS = credentials('aws-credentials')
+        AWS_CREDS = credentials('aws-credential')
 
         // Docker image configuration
         APP_VERSION = "${env.BUILD_NUMBER}"
